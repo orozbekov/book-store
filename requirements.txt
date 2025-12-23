@@ -1,0 +1,13 @@
+celery==5.5.3
+celery-redbeat==2.3.3
+Django==4.2.27
+django-cors-headers==4.4.0
+django-filter==24.3
+django-redis==5.4.0
+django-rest-framework==0.1.0
+drf-yasg==1.21.10
+pillow==10.4.0
+psycopg==3.2.13
+psycopg-binary==3.2.13
+python-decouple==3.8
+redis==6.1.1
