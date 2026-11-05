@@ -1,1 +1,11 @@
-services: {}
+services:
+  web:
+    build:
+      context: .
+      dockerfile: compose/dev/web/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
