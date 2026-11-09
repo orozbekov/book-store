@@ -3,12 +3,15 @@ services:
     build:
       context: .
       dockerfile: compose/prod/web/Dockerfile
-    env_file: .env 
+    env_file: .env
     environment:
       - DEBUG=False
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+    depends_on:
+      redis:
+        condition: service_healthy
 
   nginx:
     build:
@@ -22,6 +25,14 @@ services:
       - media_volume:/app/media:ro
     depends_on:
       - web
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   static_volume:
