@@ -33,7 +33,7 @@ RUN groupadd -r django && useradd -r -g django django
 
 COPY . .
 
-RUN mkdir -p /app/staticfiles /app/media && chown -R django:django /app
+RUN mkdir -p /app/staticfiles /app/media && chown -R django:django /app/staticfiles /app/media
 
 
 COPY compose/prod/web/entrypoint.sh /entrypoint.sh
