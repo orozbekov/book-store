@@ -47,6 +47,32 @@ services:
       timeout: 3s
       retries: 5
 
+  celery_worker:
+    build:
+      context: .
+      dockerfile: compose/prod/web/Dockerfile
+    command: celery -A core worker --loglevel=info
+    env_file: .env
+    environment:
+      - DEBUG=False
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: compose/prod/web/Dockerfile
+    command: celery -A core beat --loglevel=info --scheduler redbeat.RedBeatScheduler
+    env_file: .env
+    environment:
+      - DEBUG=False
+    depends_on:
+      redis:
+        condition: service_healthy
+
 volumes:
   static_volume:
   media_volume:
