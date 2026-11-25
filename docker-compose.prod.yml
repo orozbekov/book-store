@@ -14,8 +14,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/admin/login/')"]
       interval: 10s
@@ -33,19 +31,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  migrate:
-    build:
-      context: .
-      dockerfile: compose/prod/web/Dockerfile
-    entrypoint: []
-    command: python manage.py migrate --noinput
-    env_file: .env
-    environment:
-      - DEBUG=False
-    depends_on:
-      db:
-        condition: service_healthy
 
   nginx:
     build:
@@ -73,6 +58,7 @@ services:
       context: .
       dockerfile: compose/prod/web/Dockerfile
     command: celery -A core worker --loglevel=info
+    entrypoint: []
     env_file: .env
     environment:
       - DEBUG=False
@@ -81,8 +67,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "celery", "-A", "core", "inspect", "ping"]
       interval: 30s
@@ -95,14 +79,13 @@ services:
       context: .
       dockerfile: compose/prod/web/Dockerfile
     command: celery -A core beat --loglevel=info --scheduler redbeat.RedBeatScheduler
+    entrypoint: []
     env_file: .env
     environment:
       - DEBUG=False
     depends_on:
       redis:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
 
 volumes:
   static_volume:
