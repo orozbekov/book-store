@@ -14,6 +14,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/admin/login/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   db:
     image: postgres:16
@@ -46,6 +52,40 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: compose/prod/web/Dockerfile
+    command: celery -A core worker --loglevel=info
+    entrypoint: []
+    env_file: .env
+    environment:
+      - DEBUG=False
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "-A", "core", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: compose/prod/web/Dockerfile
+    command: celery -A core beat --loglevel=info --scheduler redbeat.RedBeatScheduler
+    entrypoint: []
+    env_file: .env
+    environment:
+      - DEBUG=False
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   static_volume:
